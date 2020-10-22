@@ -64,9 +64,13 @@ private:
 	void InitFont();
 	void CleanUpFont();
 	void DrawHUD();
-	void DrawImGui();
 	void SetupLights();
 	void SetupCamera();
+
+	//	Imgui functions:
+	void SetupImGui();
+	void UpdateImGui();
+	void DrawImGui();
 
 	//	Breakout level:
 	void SetupBricks();
@@ -77,6 +81,7 @@ private:
 	void ProcessControllerInputs(float frame_time_);
 	void ProcessTouchInputs(float frame_time_);
 	void ProcessKeyboardInputs(float frame_time_);
+	void ProcessMouseInputs(float frame_time_);
 
 	gef::SpriteRenderer* sprite_renderer_;
 	gef::Renderer3D* renderer_3d_;
@@ -106,6 +111,7 @@ private:
 	GameObject sphere_test;
 
 	//testing imgui:
+	ImGuiIO* io;
 	int test_num;
 	bool test_bool;
 

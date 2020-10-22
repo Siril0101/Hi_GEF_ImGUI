@@ -29,7 +29,8 @@ StarterApp::StarterApp(gef::PlatformD3D11& platform) :
 	input_manager_(NULL),
 
 	mesh_one_(NULL),
-	model_scene_one_(NULL)
+	model_scene_one_(NULL),
+	io(NULL)
 {
 }
 
@@ -45,15 +46,8 @@ void StarterApp::Init()
 		input_manager_->touch_manager()->EnablePanel(0);
 
 	//	Set up ImGUI:
-	//	Default GEF only stores Platform, we need PlatformD3DX11 (in order to get hwnd, device, etc.):
-	//IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
+	SetupImGui();
 
-	ImGui_ImplWin32_Init(platform_.hwnd());
-	ImGui_ImplDX11_Init(platform_.device(), platform_.device_context());
-
-	ImGui::StyleColorsDark();
 	test_num = 0;
 	test_bool = false;
 
@@ -93,7 +87,6 @@ void StarterApp::AssignFirstMesh(const char* file_name_, gef::Scene** scene_, ge
 	*scene_ = scn;
 }
 
-
 void StarterApp::CleanUp()
 {
 	if (primitive_builder_ != NULL)
@@ -124,14 +117,18 @@ void StarterApp::CleanUp()
 
 	delete model_scene_one_;
 	model_scene_one_ = NULL;
+
+	if (this->io != NULL)
+	{
+		delete this->io;
+		this->io = NULL;
+	}
 }
 
 bool StarterApp::Update(float frame_time)
 {
 	//	Update ImGUI:
-	ImGui_ImplDX11_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
+	UpdateImGui();
 
 	fps_ = 1.0f / frame_time;
 
@@ -168,6 +165,13 @@ bool StarterApp::Update(float frame_time)
 
 
 	return true;
+}
+
+void StarterApp::UpdateImGui()
+{
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
 }
 
 void StarterApp::Render()
@@ -305,7 +309,6 @@ gef::Vector4 StarterApp::GetNormal(GameObject * go_a, GameObject * go_b)
 }
 
 //https://stackoverflow.com/questions/573084/how-to-calculate-bounce-angle
-
 gef::Vector4 StarterApp::GetReflection(gef::Vector4 incident_vec_, gef::Vector4 normal_)
 {
 	gef::Vector4 u = normal_ * (incident_vec_.DotProduct(normal_) / normal_.DotProduct(normal_));
@@ -397,8 +400,6 @@ void StarterApp::DrawImGui()
 
 	ImGui::Render();	// Assemble together the draw data:
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-
-	gef::DebugOut("\ntest_num: %i", test_num);
 }
 
 void StarterApp::SetupLights()
@@ -421,6 +422,19 @@ void StarterApp::SetupCamera()
 	m_camera.SetCamFOV(gef::DegToRad(45.0f));
 	m_camera.SetCamNearPlane(0.01f);
 	m_camera.SetCamFarPlane(5000.f);
+}
+
+void StarterApp::SetupImGui()
+{
+	//	Default GEF only stores Platform, we need PlatformD3DX11 (in order to get hwnd, device, etc.):
+	//IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	io = &ImGui::GetIO();
+
+	ImGui_ImplWin32_Init(platform_.hwnd());
+	ImGui_ImplDX11_Init(platform_.device(), platform_.device_context());
+
+	ImGui::StyleColorsDark();
 }
 
 void StarterApp::SetupBricks()
@@ -516,6 +530,9 @@ void StarterApp::InputHandling(float frame_time_)
 
 		//	Keyboard input
 		ProcessKeyboardInputs(frame_time_);
+
+		//	Mouse input
+		ProcessMouseInputs(frame_time_);
 	}
 }
 
@@ -575,6 +592,7 @@ void StarterApp::ProcessTouchInputs(float frame_time_)
 					// do any processing for a new touch here
 					// we're just going to record the position of the touch
 					touch_position_ = touch->position;
+					gef::DebugOut("CLICKED!");
 				}
 			}
 			else if (active_touch_id_ == touch->id)
@@ -648,6 +666,13 @@ void StarterApp::ProcessKeyboardInputs(float frame_time_)
 		if (keyboard->IsKeyDown(gef::Keyboard::KeyCode::KC_EQUALS))
 			ball.UpdateScaleBy(0.1f * frame_time_, 0.1f * frame_time_, 0.1f * frame_time_);
 	}
+}
+
+void StarterApp::ProcessMouseInputs(float frame_time_)
+{
+	//	Set IO for imgui:
+	//https://discourse.dearimgui.org/t/input-handling-on-linux/247
+	
 }
 
 gef::Mesh* StarterApp::GetFirstMesh(gef::Scene* scene)
