@@ -63,19 +63,7 @@ void StarterApp::Init()
 	is_colliding = false;
 }
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-//LRESULT WINAPI WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-//{
-//	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
-//		return true;
-//}
-
-LRESULT StarterApp::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-		return true;
-}
 
 void StarterApp::AssignFirstMesh(const char* file_name_, gef::Scene** scene_, gef::Mesh** mesh_)
 {
@@ -172,6 +160,10 @@ void StarterApp::UpdateImGui()
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+
+	bool state = true;
+	if (state)
+		ImGui::ShowDemoWindow(&state);
 }
 
 void StarterApp::Render()

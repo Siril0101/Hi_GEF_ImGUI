@@ -17,7 +17,7 @@
 
 namespace gef
 {
-	PlatformD3D11::PlatformD3D11(HINSTANCE hinstance, UInt32 width, UInt32 height, bool fullscreen, bool vsync_enabled, HWND hwnd) :
+	PlatformD3D11::PlatformD3D11(HINSTANCE hinstance, UInt32 width, UInt32 height, bool fullscreen, bool vsync_enabled, HWND hwnd,WNDPROC proc) :
 		window_(NULL),
 		clock_last_frame_(0),
 		device_(NULL),
@@ -41,7 +41,7 @@ namespace gef
 		// create window if window has not already been provided
 		if(hwnd == NULL)
 		{
-			window_ = new WindowWin32(hinstance, width, height, fullscreen, NULL);
+			window_ = new WindowWin32(hinstance, width, height, fullscreen, proc);
 			set_width(window_->width());
 			set_height(window_->height());
 			hwnd_ = window_->hwnd();
